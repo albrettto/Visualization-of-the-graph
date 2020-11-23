@@ -33,9 +33,9 @@ namespace Visualization_of_the_graph
         {
             Pen pen_default = new Pen(Color.Azure, 2);
             Pen pen_selected = new Pen(Color.Red, 2);
-            Pen pen_for_line = new Pen(Color.Azure, 2);
-            pen_for_line.CustomEndCap = new AdjustableArrowCap(4.0F, 8.0F);
-            pen_for_line.StartCap = LineCap.ArrowAnchor;
+            Pen pen_for_line = new Pen(Color.Firebrick, 2);
+            //pen_for_line.CustomEndCap = new AdjustableArrowCap(4.0F, 8.0F);
+            //pen_for_line.StartCap = LineCap.ArrowAnchor;
             if (e.Button == MouseButtons.Right) // Если нажата правая кнопка мыши
             {
                 koortoch[n].rad = 15;
@@ -129,47 +129,48 @@ namespace Visualization_of_the_graph
                     }
                 }
             }
-            Result_TextBox.Text = versh.ToString();
         }
+
+        public void BFS(int start)
+        {
+            List<int> list = new List<int>(); //marks
+            Queue<int> s = new Queue<int>();  //path 
+            list.Add(start);
+            for (int i = 0; i < n; ++i) /*(int i = n; i >= 1; i--)*/
+            {
+                if (Matrica_DataGridView[start, i].Value != null)/*(Matrica_DataGridView.Rows[start - 1].Cells[i].Value == null)*/
+                    s.Enqueue(i+1);
+            }
+
+        again:
+            while (s.Count != 0)
+            {
+                int v = s.Peek();
+                s.Dequeue();
+                foreach (int i in list)
+                {
+                    if (i == v)
+                        goto again;
+                }
+                list.Add(v);
+                for (int i = 0; i < n; ++i)
+                {
+                    if (Matrica_DataGridView[v, i].Value != null) /*(Matrica_DataGridView.Rows[v - 1].Cells[i].Value == null)*/
+                        s.Enqueue(i+1);
+                }
+            }
+            Result_TextBox.Text = "";
+            foreach (int i in list)
+            {
+                Result_TextBox.Text += i.ToString() + " ";
+            }
+        }
+
 
         private void Search_Button_Click(object sender, EventArgs e)
         {
-            int[][] g = new int[n][];
-            for (int i = 0; i < n; i++)
-            {
-                g[i] = new int[n];
-                for (int j = 0; j < n; j++)
-                    g[i][j] = Convert.ToInt32(Matrica_DataGridView[j + 1, i].Value);
-                g[i][i] = 0;
-            }
-
-            string result = "";
-            bool[] used = new bool[n];
-            Queue<int> Och = new Queue<int>();
-            int u = Convert.ToInt32(Numb_TextBox.Text);
-            used[u] = true;
-            Och.Enqueue(u);
-            result += u + " ";
-            while (Och.Count != 0)
-            {
-                u = Och.Peek();
-                //result += u + 1 + " ";
-                Och.Dequeue();
-
-                for (int i = 0; i < g.Length; i++)
-                {
-                    if (Convert.ToBoolean(g[u][i]))
-                    {
-                        if (!used[i])
-                        {
-                            used[i] = true;
-                            Och.Enqueue(i);
-                            result += i + " ";
-                        }
-                    }
-                }
-            }
-            Result_TextBox.Text = result;
+            int start = Convert.ToInt32(Numb_TextBox.Text);
+            BFS(start);
         }
 
         private void Clear_Button_Click(object sender, EventArgs e)
@@ -178,12 +179,9 @@ namespace Visualization_of_the_graph
             n = 0;
             check = false;
             Matrica_DataGridView.Rows.Clear();  // удаление всех строк
-            int count = Matrica_DataGridView.Columns.Count;
-            for (int i = 0; i < count; i++)     // цикл удаления всех столбцов
-            {
-                Matrica_DataGridView.Columns.RemoveAt(0);
-            }
+            Matrica_DataGridView.Columns.Clear();
             versh = -1;
+            Result_TextBox.Text = "";
         }
     }
 }
